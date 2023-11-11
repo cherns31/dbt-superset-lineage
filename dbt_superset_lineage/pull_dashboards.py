@@ -226,8 +226,8 @@ def get_datasets_from_superset(superset, dashboards_datasets, dbt_tables,
                     if kind == 'virtual':  # built on custom sql
                         sql = r['sql']
                         tables = get_tables_from_sql(sql, sql_dialect)
-                        tables = [table if '.' in table else f'{schema}.{table}'
-                                  for table in tables]
+						tables = [table.lstrip(database_name+'.') if '.' in table else f'{schema}.{table}'
+								  for table in tables]
                     else:  # built on tables
                         tables = [dataset_key]
                     dbt_refs = [dbt_tables[table]['ref'] for table in tables
