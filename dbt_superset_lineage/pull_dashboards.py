@@ -83,9 +83,9 @@ def get_tables_from_dbt(dbt_manifest, dbt_db_name):
 			schema = table['schema']
 			database = table['database']
 			source = table['unique_id'].split('.')[-2]
-			table_key = schema + '.' + name
+			table_key = (schema + '.' + name).lower()
 
-			if dbt_db_name is None or database == dbt_db_name:
+			if dbt_db_name is None or database.lower() == dbt_db_name.lower():
 				# fail if it breaks uniqueness constraint
 				assert table_key not in tables, \
 					f"Table {table_key} is a duplicate name (schema + table) across databases. " \
@@ -162,7 +162,7 @@ def get_dashboards_from_superset(superset, superset_url, superset_db_id):
 			dashboards_datasets_w_db.update(datasets_w_db)
 
 			# skip database, i.e. first item, to get only "schema.table"
-			datasets_wo_db = ['.'.join(dataset[1:]) for dataset in datasets_parsed]
+			datasets_wo_db = ['.'.join(dataset[1:]).lower() for dataset in datasets_parsed]
 
 			dashboard = {
 				'id': dashboard_id,
@@ -180,7 +180,7 @@ def get_dashboards_from_superset(superset, superset_url, superset_db_id):
 	# loop to get the name of duplicated dataset and work with unique set of datasets w db
 	dashboards_datasets = set()
 	for dataset_w_db in dashboards_datasets_w_db:
-		dataset = '.'.join(dataset_w_db.split('.')[1:])  # similar logic as just a bit above
+		dataset = '.'.join(dataset_w_db.split('.')[1:]).lower() # similar logic as just a bit above
 
 		# fail if it breaks uniqueness constraint and not limited to one database
 		assert dataset not in dashboards_datasets or superset_db_id is not None, \
@@ -217,7 +217,7 @@ def get_datasets_from_superset(superset, dashboards_datasets, dbt_tables,
 				database_name = r['database']['database_name']
 				database_id = r['database']['id']
 
-				dataset_key = f'{schema}.{name}'  # same format as in dashboards
+				dataset_key = f'{schema}.{name}'.lower() # same format as in dashboards
 
 				# only add datasets that are in dashboards, optionally limit to one database
 				if dataset_key in dashboards_datasets \
